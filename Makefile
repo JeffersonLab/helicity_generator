@@ -10,7 +10,7 @@
 #    Makefile for Helicity Generator Module library
 #
 #
-BASENAME=hel
+BASENAME=heli
 #
 # Uncomment DEBUG line, to include some debugging info ( -g and -Wall)
 DEBUG	?= 1
