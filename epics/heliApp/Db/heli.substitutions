@@ -1,0 +1,13 @@
+file "$(ASYN)/db/asynRecord.db"
+{
+pattern
+{	P,	R,	PORT,	ADDR,	IMAX,	OMAX}
+{	heli:	asyn1, 	heli_1, 0,	80,	80}
+}
+
+file "$(TOP)/heliApp/Db/heliTSettle.template"
+{
+pattern
+{ P,	R,		VAL, PORT, ADDR, EGUL, DRVL, LOPR, EGUF, DRVH, HOPR, PREC}
+{heli:,	TSETTLE_SET,	0,    heli_1, 0,  -10., -10., -10.,  10.,  10.,  10.,    4}
+}

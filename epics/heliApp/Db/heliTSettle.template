@@ -1,0 +1,37 @@
+record(ao,"$(P)$(R)") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(FLNK, "$(P)$(R)Return.PROC  PP MS")
+    field(OUT,  "@asyn($(PORT),$(ADDR))TSETTLE_SET")
+    field(EGUL, "$(EGUL)")
+    field(DRVL, "$(DRVL)")
+    field(LOPR, "$(LOPR)")
+    field(EGUF, "$(EGUF)")
+    field(DRVH, "$(DRVH)")
+    field(HOPR, "$(HOPR)")
+    field(PREC, "$(PREC)")
+    field(LINR, "NO CONVERSION")
+    field(VAL,  "$(VAL)")
+}
+
+record(ao,"$(P)$(R)Return") {
+    field(DTYP, "asynInt32")
+    field(DISV, "0")
+    field(SDIS, "$(P)$(R)Pulse.VAL  NPP NMS")
+    field(OUT,  "@asyn($(PORT),$(ADDR))TSETTLE_SET")
+    field(OMSL, "closed_loop")
+    field(EGUL, "$(EGUL)")
+    field(DRVL, "$(DRVL)")
+    field(LOPR, "$(LOPR)")
+    field(EGUF, "$(EGUF)")
+    field(DRVH, "$(DRVH)")
+    field(HOPR, "$(HOPR)")
+    field(PREC, "$(PREC)")
+    field(LINR, "NO CONVERSION")
+    field(VAL,  "$(VAL)")
+}
+
+record(bo,"$(P)$(R)Pulse") {
+    field(ZNAM, "Normal")
+    field(ONAM, "Pulse")
+}

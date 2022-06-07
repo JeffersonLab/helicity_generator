@@ -12,7 +12,9 @@ dbLoadDatabase("dbd/heli.dbd")
 heli_registerRecordDeviceDriver(pdbbase)
 
 ## Load record instances
-dbLoadRecords("db/heli.db","user=moffitHost")
+dbLoadTemplate("heliApp/Db/heli.substitutions")
+
+HelicityGeneratorConfig("heli_1", 1)
 
 cd ${TOP}/iocBoot/${IOC}
 iocInit()

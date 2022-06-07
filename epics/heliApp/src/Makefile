@@ -13,6 +13,7 @@ DBD += heli.dbd
 heli_DBD += base.dbd
 
 # heli_registerRecordDeviceDriver.cpp will be created from heli.dbd
+heli_SRCS += drvHelicityGenerator
 heli_SRCS += heli_registerRecordDeviceDriver.cpp
 heli_SRCS_DEFAULT += heliMain.cpp
 heli_SRCS_vxWorks += -nil-
@@ -21,20 +22,24 @@ heli_SRCS_vxWorks += -nil-
 heli_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Add the support libraries needed by this application
-#heli_LIBS += asyn
+heli_LIBS += asyn
 
 # To build SNL programs, SNCSEQ must be defined
 # in the <top>/configure/RELEASE file:
-ifneq ($(SNCSEQ),)
-    heli_DBD += sncExample.dbd
-    heli_SRCS += sncExample.stt
-    heli_LIBS += seq pv
-endif
+#ifneq ($(SNCSEQ),)
+#    heli_DBD += sncExample.dbd
+#    heli_SRCS += sncExample.stt
+#    heli_LIBS += seq pv
+#endif
 
 # Finally include the libraries from base
 heli_LIBS += $(EPICS_BASE_IOC_LIBS)
+heli_LDFLAGS += -L$(LINUXVME_LIB) -ljvme
+heli_LDFLAGS += -L${HOME}/work/HEL -lheli
+
+USR_INCLUDES += -I$(LINUXVME_INC)
+USR_INCLUDES += -I${HOME}/work/HEL
 
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
-

@@ -14,6 +14,17 @@
 
 #include <stdint.h>
 
+/* register masks - from drvHel.c */
+#define HELI_TSETTLE_MASK  0x1f	/* 5 bit register */
+#define HELI_TSTABLE_MASK  0x1f	/* 5 bit register */
+#define HELI_DELAY_MASK    0x0f	/* 4 bit register */
+#define HELI_MONTH_MASK	   0xff
+#define HELI_DAY_MASK	   0xff
+#define HELI_YEAR_MASK     0xff
+#define HELI_PATTERN_MASK  0x07	/* 3 bit register */
+#define HELI_CLOCK_MASK    0xff
+
+
 #define HELI_INIT_DEBUG (0 << 1)
 
 typedef struct
