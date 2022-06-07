@@ -8,6 +8,10 @@ pattern
 file "$(TOP)/heliApp/Db/heliTSettle.template"
 {
 pattern
-{ P,	R,		VAL, PORT, ADDR, EGUL, DRVL, LOPR, EGUF, DRVH, HOPR, PREC}
-{heli:,	TSETTLE_SET,	0,    heli_1, 0,  -10., -10., -10.,  10.,  10.,  10.,    4}
+{ P,	R,		VAL, PORT, ADDR}
+{heli:,	HELTSETTLE,	0,    heli_1, 0}
+{heli:,	HELTSTABLE,	0,    heli_1, 0}
+{heli:,	HELDELAY,	0,    heli_1, 0}
+{heli:,	HELPATTERN,	0,    heli_1, 0}
+{heli:,	HELCLOCK,	0,    heli_1, 0}
 }
