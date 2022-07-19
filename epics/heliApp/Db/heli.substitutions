@@ -5,13 +5,3 @@ pattern
 {	heli:	asyn1, 	heli_1, 0,	80,	80}
 }
 
-file "$(TOP)/heliApp/Db/heliTSettle.template"
-{
-pattern
-{ P,	R,		VAL, PORT, ADDR}
-{heli:,	HELTSETTLE,	0,    heli_1, 0}
-{heli:,	HELTSTABLE,	0,    heli_1, 0}
-{heli:,	HELDELAY,	0,    heli_1, 0}
-{heli:,	HELPATTERN,	0,    heli_1, 0}
-{heli:,	HELCLOCK,	0,    heli_1, 0}
-}

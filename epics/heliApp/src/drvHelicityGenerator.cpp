@@ -38,6 +38,11 @@ static const char *driverName = "HelicityGenerator";
 #define patternInString    "HELPATTERNin"
 #define clockInString      "HELCLOCKin"
 
+#define dayString          "HELDAY"
+#define monthString        "HELMONTH"
+#define yearString         "HELYEAR"
+
+
 #define MAX_SIGNALS 20
 
 /** Class definition for the HelicityGenerator class
@@ -63,6 +68,10 @@ protected:
   int32_t P_delayIn;
   int32_t P_patternIn;
   int32_t P_clockIn;
+
+  int32_t P_day;
+  int32_t P_month;
+  int32_t P_year;
 
 private:
   int32_t P_boardNum;
@@ -91,6 +100,10 @@ HelicityGenerator::HelicityGenerator(const char* portName,int32_t boardNum)
   createParam(delayInString, asynParamInt32, &P_delayIn);
   createParam(patternInString, asynParamInt32, &P_patternIn);
   createParam(clockInString, asynParamInt32, &P_clockIn);
+
+  createParam(dayString, asynParamInt32, &P_day);
+  createParam(monthString, asynParamInt32, &P_month);
+  createParam(yearString, asynParamInt32, &P_year);
 
   vmeOpenDefaultWindows();
   heliInit(0xa00000, 0);

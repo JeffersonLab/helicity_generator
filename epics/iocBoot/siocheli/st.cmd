@@ -12,7 +12,8 @@ dbLoadDatabase("dbd/heli.dbd")
 heli_registerRecordDeviceDriver(pdbbase)
 
 ## Load record instances
-dbLoadTemplate("heliApp/Db/heli.substitutions")
+#dbLoadTemplate("heliApp/Db/heli.substitutions")
+dbLoadRecords("db/helboard.db","P=heli:,PORT=heli_1,ADDR=0")
 
 HelicityGeneratorConfig("heli_1", 1)
 

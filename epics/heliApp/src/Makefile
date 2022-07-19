@@ -13,7 +13,7 @@ DBD += heli.dbd
 heli_DBD += base.dbd
 
 # heli_registerRecordDeviceDriver.cpp will be created from heli.dbd
-heli_SRCS += drvHelicityGenerator
+heli_SRCS += drvHelicityGenerator.cpp
 heli_SRCS += heli_registerRecordDeviceDriver.cpp
 heli_SRCS_DEFAULT += heliMain.cpp
 heli_SRCS_vxWorks += -nil-
