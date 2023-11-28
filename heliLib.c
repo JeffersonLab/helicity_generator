@@ -43,7 +43,6 @@ static heliLibVars hl = {0, NULL, 0, PTHREAD_MUTEX_INITIALIZER, 0};
 #define HLOCK   if(pthread_mutex_lock(&hl.rw_mutex)<0) perror("pthread_mutex_lock");
 #define HUNLOCK if(pthread_mutex_unlock(&hl.rw_mutex)<0) perror("pthread_mutex_unlock");
 
-#define WRITEHELI(_reg,_val) {hl.local._reg = _val; vmeWrite8(&hl.dev->_reg, _val);}
 
 /* Settle Time (usec) */
 double fTSettleVals[32] = {
@@ -75,7 +74,7 @@ double fDelayVals[16] =
   };
 
 /* Helicity Pattern */
-char sPatternVals[12][256] =
+char sPatternVals[11][256] =
   {
     "Pair",
     "Quartet",
@@ -90,6 +89,17 @@ char sPatternVals[12][256] =
     "32-Pair"
   };
 
+
+/**
+ * @brief Initialize Helicity Generator Library
+ * @details Initialize Helicity Generator Library
+ * @param[in] a24_addr VME A24 of the Helicity Generator (0xa00000)
+ * @param[in] init_flag Initialization bit mask
+ *             value  what
+ *                 1  DEBUG enabled
+ *
+ * @return 0 if successful, otherwise -1
+ */
 int32_t
 heliInit(uint32_t a24_addr, uint16_t init_flag)
 {
@@ -140,6 +150,12 @@ heliInit(uint32_t a24_addr, uint16_t init_flag)
   return 0;
 }
 
+/**
+ * @brief Show Helicity Generator Status
+ * @details Print the status of the helicity generator to standard out.
+ * @param[in] print_regs Flag to print raw register values (1=enable)
+ * @return 0 if successful, otherwise -1
+ */
 int32_t
 heliStatus(int32_t print_regs)
 {
@@ -209,6 +225,12 @@ heliStatus(int32_t print_regs)
   return 0;
 }
 
+/**
+ * @brief Enable / Disable debug messages
+ * @details Enable / Disable debug messages
+ * @param[in] debug_set 1=enable, 0=disable
+ * @return 0 if successful, otherwise -1
+ */
 int32_t
 heliSetDebug(uint8_t debug_set)
 {
@@ -221,6 +243,11 @@ heliSetDebug(uint8_t debug_set)
   return 0;
 }
 
+/**
+ * @brief Return the value of the debug flag
+ * @details Return the value of the debug flag
+ * @return 1 if enabled, 0 if disabled, otherwise -1
+ */
 int32_t
 heliGetDebug()
 {
@@ -234,49 +261,507 @@ heliGetDebug()
   return rval;
 }
 
+/**
+ * @brief Set helicity generator registers
+ * @details Set the values directly to helicity generator registers
+ * @param[in] TSETTLEin TSETTLE register value
+ * @param[in] TSTABLEin TSTABLE register value
+ * @param[in] DELAYin DELAY register value
+ * @param[in] PATTERNin PATTERN register value
+ * @param[in] CLOCKin CLOCK register value
+ * @return 0 if successful, otherwise -1
+ */
 int32_t
-heliSetRegisters(uint8_t tsettle_set, uint8_t tstable_set, uint8_t delay_set,
-		 uint8_t pattern_set, uint8_t clock_set)
+heliSetRegisters(uint8_t TSETTLEin, uint8_t TSTABLEin, uint8_t DELAYin,
+		 uint8_t PATTERNin, uint8_t CLOCKin)
 {
   CHECKHELI;
 
-  if(tsettle_set > HELI_TSETTLE_MASK)
+  if(TSETTLEin > HELI_TSETTLE_MASK)
     {
-      HELI_ERR("Invalid tsettle_set (0x%x)\n", tsettle_set);
+      HELI_ERR("Invalid TSETTLEin (0x%x)\n", TSETTLEin);
       return ERROR;
     }
 
-  if(tstable_set > HELI_TSTABLE_MASK)
+  if(TSTABLEin > HELI_TSTABLE_MASK)
     {
-      HELI_ERR("Invalid tstable_set (0x%x)\n", tstable_set);
+      HELI_ERR("Invalid TSTABLEin (0x%x)\n", TSTABLEin);
       return ERROR;
     }
 
-  if(delay_set > HELI_DELAY_MASK)
+  if(DELAYin > HELI_DELAY_MASK)
     {
-      HELI_ERR("Invalid delay_set (0x%x)\n", delay_set);
+      HELI_ERR("Invalid DELAYin (0x%x)\n", DELAYin);
       return ERROR;
     }
 
-  if(pattern_set > HELI_PATTERN_MASK)
+  if(PATTERNin > HELI_PATTERN_MASK)
     {
-      HELI_ERR("Invalid pattern_set (0x%x)\n", pattern_set);
+      HELI_ERR("Invalid PATTERNin (0x%x)\n", PATTERNin);
       return ERROR;
     }
 
-  if(clock_set > HELI_CLOCK_MASK)
+  if(CLOCKin > HELI_CLOCK_MASK)
     {
-      HELI_ERR("Invalid clock_set (0x%x)\n", clock_set);
+      HELI_ERR("Invalid CLOCKin (0x%x)\n", CLOCKin);
       return ERROR;
     }
 
 
   HLOCK;
-  vmeWrite8(&hl.dev->tsettle, tsettle_set);
-  vmeWrite8(&hl.dev->tstable, tstable_set);
-  vmeWrite8(&hl.dev->delay, delay_set);
-  vmeWrite8(&hl.dev->pattern, pattern_set);
-  vmeWrite8(&hl.dev->clock, clock_set);
+  vmeWrite8(&hl.dev->tsettle, TSETTLEin);
+  vmeWrite8(&hl.dev->tstable, TSTABLEin);
+  vmeWrite8(&hl.dev->delay, DELAYin);
+  vmeWrite8(&hl.dev->pattern, PATTERNin);
+  vmeWrite8(&hl.dev->clock, CLOCKin);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Return the helicity generator register values
+ * @details Return the helicity generator register values
+ * @param[inout] TSETTLEout TSETTLE register value
+ * @param[out] TSTABLEout TSTABLE register value
+ * @param[out] DELAYout DELAY register value
+ * @param[out] PATTERNout PATTERN register value
+ * @param[out] CLOCKout CLOCK register value
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetRegisters(uint8_t *TSETTLEout, uint8_t *TSTABLEout, uint8_t *DELAYout,
+		 uint8_t *PATTERNout, uint8_t *CLOCKout)
+{
+  CHECKHELI;
+
+  HLOCK;
+  *TSETTLEout = vmeRead8(&hl.dev->tsettle) & HELI_TSETTLE_MASK;
+  *TSTABLEout = vmeRead8(&hl.dev->tstable) & HELI_TSTABLE_MASK;
+  *DELAYout = vmeRead8(&hl.dev->delay) & HELI_DELAY_MASK;
+  *PATTERNout = vmeRead8(&hl.dev->pattern) & HELI_PATTERN_MASK;
+  *CLOCKout = vmeRead8(&hl.dev->clock) & HELI_CLOCK_MASK;
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Set the line sync mode
+ * @details Set the line sync mode
+ * @param[in] CLOCKs Line Sync Option
+ *            0 : 30 Hz Line Sync
+ *            1 : 120 Hz Line Sync
+ *            2 : 240 Hz Line Sync
+ *            3 : Free Clock
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliSetMode(uint32_t CLOCKs)
+{
+  CHECKHELI;
+
+  if(CLOCKs > 4)
+    {
+      HELI_ERR("Invalid CLOCKs (%d)\n", CLOCKs);
+      return -1;
+    }
+
+  HLOCK;
+  uint8_t masked = vmeRead8(&hl.dev->clock) & ~0x3; /* Keep the any other settings (BOARDCLOCKd) */
+  vmeWrite8(&hl.dev->clock, CLOCKs | masked);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Return the line sync status
+ * @details Return the line sync status
+ * @param[inout] CLOCKd Line Sync Status
+ *            0 : 30 Hz Line Sync
+ *            1 : 120 Hz Line Sync
+ *            2 : 240 Hz Line Sync
+ *            3 : Free Clock
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetMode(uint32_t *CLOCKd)
+{
+  CHECKHELI;
+
+  HLOCK;
+  *CLOCKd = vmeRead8(&hl.dev->clock) & 0x3;
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Set the helicity pattern
+ * @details Set the helicity pattern
+ * @param[in] PATTERNs Helicity Pattern mode
+ *               0 : Pair
+ *               1 : Quartet
+ *               2 : Octet
+ *               3 : Toggle
+ *               4 : Hexo-Quad
+ *               5 : Octo-Quad
+ *               6 : SPARE [Toggle]
+ *               7 : SPARE [Toggle]
+ *               8 : Thue-Morse-64
+ *               9 : 16-Quad
+ *              10 : 32-Pair
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliSetHelicityPattern(uint32_t PATTERNs)
+{
+  CHECKHELI;
+
+  if(PATTERNs > 10)
+    {
+      HELI_ERR("Invalid PATTERNs (%d)\n", PATTERNs);
+      return -1;
+    }
+
+  HLOCK;
+  vmeWrite8(&hl.dev->pattern, PATTERNs);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Get the helicity pattern setting
+ * @details Get the helicity pattern setting
+ * @param[out] PATTERNd Helicity Pattern setting
+ *               0 : Pair
+ *               1 : Quartet
+ *               2 : Octet
+ *               3 : Toggle
+ *               4 : Hexo-Quad
+ *               5 : Octo-Quad
+ *               6 : SPARE [Toggle]
+ *               7 : SPARE [Toggle]
+ *               8 : Thue-Morse-64
+ *               9 : 16-Quad
+ *              10 : 32-Pair
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetHelicityPattern(uint32_t *PATTERNd)
+{
+  CHECKHELI;
+
+  HLOCK;
+  *PATTERNd = vmeRead8(&hl.dev->pattern) & HELI_PATTERN_MASK;
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Set the helicity reporting delay
+ * @details Set the helicity reporting delay
+ * @param[in] DELAYs Helicity Reporting Delay setting
+ *             0 : No delay
+ *             1 : 1 window
+ *             2 : 2 windows
+ *             3 : 4 windows
+ *             4 : 8 windows
+ *             5 : 16 windows
+ *             6 : 24 windows
+ *             7 : 32 windows
+ *             8 : 40 windows
+ *             9 : 48 windows
+ *            10 : 64 windows
+ *            11 : 72 windows
+ *            12 : 96 windows
+ *            13 : 112 windows
+ *            14 : 128 windows
+ *            15 : 256 windows
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliSetReportingDelay(uint32_t DELAYs)
+{
+  CHECKHELI;
+
+  if(DELAYs > 10)
+    {
+      HELI_ERR("Invalid DELAYs (%d)\n", DELAYs);
+      return -1;
+    }
+
+  HLOCK;
+  vmeWrite8(&hl.dev->delay, DELAYs);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Get the helicity reporting delay
+ * @details Get the helicity reporting delay
+ * @param[out] DELAYd Helicity Reporting Delay setting
+ *             0 : No delay
+ *             1 : 1 window
+ *             2 : 2 windows
+ *             3 : 4 windows
+ *             4 : 8 windows
+ *             5 : 16 windows
+ *             6 : 24 windows
+ *             7 : 32 windows
+ *             8 : 40 windows
+ *             9 : 48 windows
+ *            10 : 64 windows
+ *            11 : 72 windows
+ *            12 : 96 windows
+ *            13 : 112 windows
+ *            14 : 128 windows
+ *            15 : 256 windows
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetReportingDelay(uint32_t *DELAYd)
+{
+  CHECKHELI;
+
+  HLOCK;
+  *DELAYd = vmeRead8(&hl.dev->delay) & HELI_DELAY_MASK;
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Get the timing parameters of the helicity window
+ * @details Get the timing parameters of the helicity window
+ * @param[out] fTSettleReadbackVal TSettle [usec]
+ * @param[out] fTStableReadbackVal TStable [usec]
+ * @param[out] fFreqReadback Helicity Board Frequency (Hz)
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetHelcityTiming(double *fTSettleReadbackVal, double *fTStableReadbackVal, double *fFreqReadback)
+{
+  CHECKHELI;
+
+  uint8_t iClockReadback, iTSettleReadback, iTStableReadback;
+
+  HLOCK;
+  iClockReadback = vmeRead8(&hl.dev->clock) & 0x3;
+  iTSettleReadback = vmeRead8(&hl.dev->tsettle) & HELI_TSETTLE_MASK;
+  iTStableReadback = vmeRead8(&hl.dev->tstable) & HELI_TSTABLE_MASK;
+
+  /* get tsettle time */
+  *fTSettleReadbackVal = fTSettleVals[iTSettleReadback];
+
+  /* get tstable time and frequency */
+  switch (iClockReadback)
+    {
+    case 0:
+      *fFreqReadback = 30.0;
+      *fTStableReadbackVal = ((1.0 / *fFreqReadback) * 1000000.0) - *fTSettleReadbackVal;
+      break;
+
+    case 1:
+      *fFreqReadback = 120.0;
+      *fTStableReadbackVal = ((1.0 / *fFreqReadback) * 1000000.0) - *fTSettleReadbackVal;
+      break;
+
+    case 2:
+      *fFreqReadback = 240.0;
+      *fTStableReadbackVal = ((1.0 / *fFreqReadback) * 1000000.0) - *fTSettleReadbackVal;
+      break;
+
+    default:	/* free clock */
+      *fTStableReadbackVal = fTStableVals[iTStableReadback];
+      *fFreqReadback = (1.0 / (*fTSettleReadbackVal + *fTStableReadbackVal)) * 1000000.0;
+      break;
+    }
+
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Get the frequency of the helicity signal
+ * @details Get the frequency of the helicity signal
+ * @param[out] FREQ Frequency of Helicity signal (Hz)
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetHelicityBoardFrequency(double *FREQ)
+{
+  double ftsettle, ftstable, ffreq;
+  int32_t rval = heliGetHelcityTiming(&ftsettle, &ftstable, &ffreq);
+
+  if(rval < 0)
+    return -1;
+
+  *FREQ = ffreq;
+
+  return 0;
+}
+
+/**
+ * @brief Print Allowed values for TSettle to standard out
+ * @details Print Allowed values for TSettle to standard out
+ */
+void
+heliPrintTSettle()
+{
+  printf("  Index    TSettle [usec]     Index    TSettle [usec]\n");
+  int32_t i;
+  for(i = 0; i < 16; i++)
+    printf("     %2d   %8.f               %2d   %8.f\n", i, fTSettleVals[i],
+	   i+16, fTSettleVals[i+16]);
+}
+
+/**
+ * @brief Set TSettle for the helicity signal
+ * @details Set TSettle for the helicity signal
+ * @param[in] TSETTLEs TSettle index from these values
+ * Index    TSettle [usec]     Index    TSettle [usec]
+ *     0          5               16        120
+ *     1         10               17        130
+ *     2         15               18        140
+ *     3         20               19        150
+ *     4         25               20        160
+ *     5         30               21        170
+ *     6         35               22        180
+ *     7         40               23        190
+ *     8         45               24        200
+ *     9         50               25        250
+ *    10         60               26        300
+ *    11         70               27        350
+ *    12         80               28        400
+ *    13         90               29        450
+ *    14        100               30        500
+ *    15        110               31       1000
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliSetTSettle(uint8_t TSETTLEs)
+{
+  CHECKHELI;
+
+  if(TSETTLEs > 32)
+    {
+      HELI_ERR("Invalid TSETTLEs (%d)\n", TSETTLEs);
+      return -1;
+    }
+
+  HLOCK;
+  vmeWrite8(&hl.dev->tsettle, TSETTLEs);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Get the TSettle for the helicity signal
+ * @details Get the TSettle for the helicity signal
+ * @param[out] TSETTLEd Value of TSettle [usec]
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetTSettle(double *TSETTLEd)
+{
+  double ftsettle, ftstable, ffreq;
+  int32_t rval = heliGetHelcityTiming(&ftsettle, &ftstable, &ffreq);
+
+  if(rval < 0)
+    return -1;
+
+  *TSETTLEd = ftsettle;
+
+  return 0;
+}
+
+/**
+ * @brief Print Allowed values for TStable to standard out
+ * @details Print Allowed values for TStable to standard out
+ */
+void
+heliPrintTStable()
+{
+  printf("  Index    TStable [usec]\n");
+  int32_t i;
+  for(i = 0; i < 32; i++)
+    printf("     %2d   %8.2f\n", i, fTStableVals[i]);
+}
+
+/**
+ * @brief Set TStable of the helicity signal
+ * @details Set TStable of the helicity signal
+ * @param[in] TSTABLEs Index of TStable
+ * Index    TStable [usec]     Index    TStable [usec]
+ *     0     240.40               16    1000.00
+ *     1     245.40               17    1001.65
+ *     2     250.40               18    1318.90
+ *     3     255.40               19    1348.90
+ *     4     470.85               20    2000.00
+ *     5     475.85               21    3000.00
+ *     6     480.85               22    4066.65
+ *     7     485.85               23    5000.00
+ *     8     490.85               24    6000.00
+ *     9     495.85               25    7000.00
+ *    10     500.85               26    8233.35
+ *    11     505.85               27    8243.35
+ *    12     510.85               28   16567.00
+ *    13     515.85               29   16667.00
+ *    14     900.00               30   33230.00
+ *    15     971.65               31   33330.00
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliSetTStable(uint8_t TSTABLEs)
+{
+  CHECKHELI;
+
+  if(TSTABLEs > 32)
+    {
+      HELI_ERR("Invalid TSTABLEs (%d)\n", TSTABLEs);
+      return -1;
+    }
+
+  HLOCK;
+  vmeWrite8(&hl.dev->tstable, TSTABLEs);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Get the TStable for the helicity signal
+ * @details Get the TStable for the helicity signal
+ * @param[out] TSTABLEd Value of TStable [usec]
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetTStable(double *TSTABLEd)
+{
+  double ftsettle, ftstable, ffreq;
+  int32_t rval = heliGetHelcityTiming(&ftsettle, &ftstable, &ffreq);
+
+  if(rval < 0)
+    return -1;
+
+  *TSTABLEd = ftstable;
+
+  return 0;
+}
+
+int32_t
+heliGetBoardClock(uint32_t *BOARDCLOCKd)
+{
+  CHECKHELI;
+
+  HLOCK;
   HUNLOCK;
 
   return 0;

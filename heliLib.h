@@ -41,12 +41,38 @@ typedef struct
 #define HELI_MONTH_MASK	   0xff
 #define HELI_DAY_MASK	   0xff
 #define HELI_YEAR_MASK     0xff
-#define HELI_PATTERN_MASK  0x07	/* 3 bit register */
+#define HELI_PATTERN_MASK  0x0f	/* 4 bit register */
 #define HELI_CLOCK_MASK    0xff
 
 
 int32_t heliInit(uint32_t a24_addr, uint16_t init_flag);
 int32_t heliStatus(int32_t print_regs);
 
-int32_t heliSetRegisters(uint8_t tsettle_set, uint8_t tstable_set, uint8_t delay_set,
-			 uint8_t pattern_set, uint8_t clock_set);
+int32_t heliSetDebug(uint8_t debug_set);
+int32_t heliGetDebug();
+
+int32_t heliSetRegisters(uint8_t TSETTLEin, uint8_t TSTABLEin, uint8_t DELAYin,
+			 uint8_t PATTERNin, uint8_t CLOCKin);
+int32_t heliGetRegisters(uint8_t *TSETTLEout, uint8_t *TSTABLEout, uint8_t *DELAYout,
+			 uint8_t *PATTERNout, uint8_t *CLOCKout);
+
+int32_t heliSetMode(uint32_t CLOCKs);
+int32_t heliGetMode(uint32_t *CLOCKd);
+
+int32_t heliSetHelicityPattern(uint32_t PATTERNs);
+int32_t heliGetHelicityPattern(uint32_t *PATTERNd);
+
+int32_t heliSetReportingDelay(uint32_t DELAYs);
+int32_t heliGetReportingDelay(uint32_t *DELAYd);
+
+int32_t heliGetHelcityTiming(double *fTSettleReadbackVal,
+			     double *fTStableReadbackVal, double *fFreqReadback);
+int32_t heliGetHelicityBoardFrequency(double *FREQ);
+
+void heliPrintTSettle();
+int32_t heliSetTSettle(uint8_t TSETTLEs);
+int32_t heliGetTSettle(double *TSETTLEd);
+
+void heliPrintTStable();
+int32_t heliSetTStable(uint8_t TSTABLEs);
+int32_t heliGetTStable(double *TSTABLEd);
