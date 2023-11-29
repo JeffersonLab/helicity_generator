@@ -17,7 +17,7 @@
 #include "jvme.h"
 #include "heliLib.h"
 
-char progName[128] = "heliConfig";
+char progName[128] = "heliConfigRegs";
 
 void
 usage()
@@ -84,7 +84,7 @@ main(int32_t argc, char *argv[])
     }
   else
     {
-      stat = heliConfigure(tsettle_set, tstable_set, delay_set, pattern_set, clock_set);
+      stat = heliSetRegisters(tsettle_set, tstable_set, delay_set, pattern_set, clock_set);
       if (stat != OK)
 	{
 	  printf("heliConfig failed: code 0x%08x\n",stat);
@@ -108,6 +108,6 @@ main(int32_t argc, char *argv[])
 
 /*
   Local Variables:
-  compile-command: "make -k heliConfig"
+  compile-command: "make -k heliConfigRegs "
   End:
- */
+*/
