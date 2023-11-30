@@ -48,15 +48,25 @@ void
 usage()
 {
   printf("\nUsage: \n");
-  printf("\t %s <args>\n", progName);
+  printf("\t %s [options]\n", progName);
   printf("Configure the helicity generator module with the provided arguments\n");
   printf("\n");
+  printf(" -m, --mode {index}                select the clock mode\n");
+  printf(" -p, --pattern {index}             select the helicity pattern\n");
+  printf(" -d, --delay {index}               select the helicity delay\n");
+  printf(" -t, --tsettle {index}             select the tsettle\n");
+  printf(" -s, --tstable {index}             select the tstable\n");
+  printf(" -b, --boardclock {index}          select the board clock output\n");
+  printf("     --show {selections}           show the available selections for {selections}\n");
+  printf("                                   (e.g. --show mode,pattern,tstable)\n");
+  printf(" -h, --help                        this help message\n");
   printf("\n");
   printf("Exit status:\n");
   printf("  0  if OK,\n");
   printf("  1  if argument ERROR\n");
   printf("  2  if VME Driver ERROR\n");
   printf("  3  if helicity generator library ERROR\n");
+  printf("\n");
 }
 
 /* Search through the -show string, searching for helicity generator parameter names */
@@ -66,7 +76,7 @@ fillShowBits(char argString[], uint8_t *showBits)
   *showBits = 0;
 
   char parameter[6][256] = {
-    "clock",
+    "mode",
     "pattern",
     "delay",
     "tsettle",
@@ -168,6 +178,12 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
 	  rval = 1;
 	}
     }
+  if(*doBits == 0)
+    {
+      usage();
+      rval = -1;
+    }
+
 
   return rval;
 }
