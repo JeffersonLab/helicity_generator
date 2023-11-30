@@ -15,8 +15,8 @@ With your *LINUXVME* environment variables set, compile and install the library 
   make install
 #+end_src
 
-** Use a test programs to configure and print helicity control parametrs
-In ~test/~ you'll find some useful programs to test the library installation and configure to the module.
+** Use programs to configure and print helicity control parametrs
+In ~test/~ you'll find some useful programs to get the status of and configure the module.
 
 Compile these with
 #+begin_src shell
