@@ -1,0 +1,79 @@
+#+TITLE: Library for the JLab Helicity Generator
+
+Author:
+- Bryan Moffit
+- TJNAF Fast Electronics and Data Acquisition
+
+* What is this for?
+
+  This is the library for the JLab Helicity Generator.  Use it with [[https://github.com/JeffersonLab/jvme][jvme]] to configure a [[https://wiki.jlab.org/ciswiki/index.php/Parity_Quality_Beam#New_Helicity_Board][Helicity Generator]] in a VME crate.
+
+* What do I do with it?
+
+With your *LINUXVME* environment variables set, compile and install the library with
+#+begin_src shell
+  make install
+#+end_src
+
+** Use a test programs to configure and print helicity control parametrs
+In ~test/~ you'll find some useful programs to test the library installation and configure to the module.
+
+Compile these with
+#+begin_src shell
+  cd test/
+  make 
+#+end_src
+
+*** ~heliStatus~ 
+Initialize the library and display the current status of the helicity generator at default address ~0xA00000~.
+#+begin_example
+--------------------------------------------------------------------------------
+STATUS for JLab Helicity Control Board
+
+       month (0x00) = 0x06	         day (0x01) = 0x06
+        year (0x02) = 0x17	     tsettle (0x07) = 0x00
+     tstable (0x09) = 0x1e	       delay (0x0b) = 0x04
+     pattern (0x0d) = 0x00	       clock (0x0f) = 0x23
+
+
+ Mode                            Settle Time (usec)      Stable Time (usec)
+  Free Clock                          100.00                33230.00
+
+ Helicity Pattern:
+  Pair
+
+ Reporting Delay:
+  8 windows
+
+ Helicity Board Frequency:
+  30.00 Hz
+
+ Output Clock:
+  20 MHz
+
+ Firmware:
+  Month:   6   Day:   6   Year:  23
+
+
+--------------------------------------------------------------------------------
+#+end_example    
+*** ~heliConfigure [options]~
+Configure the helicity generator module with the provided arguments
+#+begin_example
+ -m, --mode {index}                select the clock mode
+ -p, --pattern {index}             select the helicity pattern
+ -d, --delay {index}               select the helicity delay
+ -t, --tsettle {index}             select the tsettle
+ -s, --tstable {index}             select the tstable
+ -b, --boardclock {index}          select the board clock output
+     --show {selections}           show the available selections for {selections}
+                                   (e.g. --show mode,pattern,tstable)
+ -h, --help                        this help message
+
+Exit status:
+  0  if OK,
+  1  if argument ERROR
+  2  if VME Driver ERROR
+  3  if helicity generator library ERROR
+#+end_example
+
