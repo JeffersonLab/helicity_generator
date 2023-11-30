@@ -390,9 +390,10 @@ heliPrintModeSelections()
   int32_t i;
   for(i = 0; i < 4; i++)
     {
-      printf("     %2d   %4.f Line Sync\n", i, fClockVals[i]);
-      if(fClockVals < 0)
+      if(fClockVals[i] < 0)
 	printf("     %2d   Free Clock\n", i);
+      else
+	printf("     %2d   %4.f Line Sync\n", i, fClockVals[i]);
     }
 }
 
@@ -454,7 +455,7 @@ heliGetMode(uint32_t *CLOCKd)
 void
 heliPrintHelicityPatternSelections()
 {
-  printf("  Index    Pattern\n");
+  printf("  Index   Pattern\n");
   int32_t i;
   for(i = 0; i < 11; i++)
     printf("     %2d   %s\n", i, sPatternVals[i]);
@@ -531,11 +532,12 @@ heliGetHelicityPattern(uint32_t *PATTERNd)
 void
 heliPrintReportingDelaySelections()
 {
-  printf("  Index    Reporting Delay [windows]     Reporting Delay [windows]\n");
+  printf("           Reporting                    Reporting\n");
+  printf("  Index    Delay [windows]     Index    Delay [windows]\n");
   int32_t i;
   for(i = 0; i < 8; i++)
-    printf("     %2d   %4d               %2d   %4d\n", i, iDelayVals[i],
-	   i+8, iDelayVals[i+16]);
+    printf("     %2d     %4d                  %2d     %4d\n", i, iDelayVals[i],
+	   i+8, iDelayVals[i+8]);
 }
 
 /**
@@ -751,10 +753,11 @@ heliGetTSettle(double *TSETTLEd)
 void
 heliPrintTStableSelections()
 {
-  printf("  Index    TStable [usec]\n");
+  printf("  Index    TStable [usec]     Index    TStable [usec]\n");
   int32_t i;
-  for(i = 0; i < 32; i++)
-    printf("     %2d   %8.2f\n", i, fTStableVals[i]);
+  for(i = 0; i < 16; i++)
+    printf("     %2d   %8.f               %2d   %8.f\n", i, fTStableVals[i],
+	   i+16, fTStableVals[i+16]);
 }
 
 /**
