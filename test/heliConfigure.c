@@ -30,7 +30,7 @@ enum doBits
     DO_TSETTLE    = 1 << 3,
     DO_TSTABLE    = 1 << 4,
     DO_BOARDCLOCK = 1 << 5,
-    SHOW          = 1 << 6
+    LIST          = 1 << 6
   };
 
 /* this structure holds the user arguments */
@@ -57,8 +57,8 @@ usage()
   printf(" -t, --tsettle {index}             select the tsettle\n");
   printf(" -s, --tstable {index}             select the tstable\n");
   printf(" -b, --boardclock {index}          select the board clock output\n");
-  printf("     --show {selections}           show the available selections for {selections}\n");
-  printf("                                   (e.g. --show mode,pattern,tstable)\n");
+  printf(" -l, --list {selections}           list the available selections for {selections}\n");
+  printf("                                   (e.g. --list mode,pattern,tstable)\n");
   printf(" -h, --help                        this help message\n");
   printf("\n");
   printf("Exit status:\n");
@@ -69,11 +69,11 @@ usage()
   printf("\n");
 }
 
-/* Search through the -show string, searching for helicity generator parameter names */
+/* Search through the --list string, searching for helicity generator parameter names */
 void
-fillShowBits(char argString[], uint8_t *showBits)
+fillListBits(char argString[], uint8_t *listBits)
 {
-  *showBits = 0;
+  *listBits = 0;
 
   char parameter[6][256] = {
     "mode",
@@ -88,11 +88,11 @@ fillShowBits(char argString[], uint8_t *showBits)
   for(iparam = 0; iparam < 6; iparam++)
     {
       if(strstr(argString, parameter[iparam]) != NULL)
-	*showBits |= (1 << iparam);
+	*listBits |= (1 << iparam);
     }
 
-  if(*showBits > 0)
-    *showBits |= SHOW;
+  if(*listBits > 0)
+    *listBits |= LIST;
 
 }
 
@@ -102,7 +102,7 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
 {
   int32_t rval = 0;
 
-  char showString[256];
+  char listString[256];
   static struct option long_options[] =
   {
     /* {const char *name, int has_arg, int *flag, int val} */
@@ -114,7 +114,7 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
     {"tsettle",    required_argument, 0,        't'},
     {"tstable",    required_argument, 0,        's'},
     {"boardclock", required_argument, 0,        'b'},
-    {"show",       required_argument, 0,        'l'},
+    {"list",       required_argument, 0,        'l'},
     {0, 0, 0, 0}
   };
 
@@ -126,7 +126,7 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
     {
       int opt_param, option_index = 0;
       option_index = 0;
-      opt_param = getopt_long (argc, argv, "h:",
+      opt_param = getopt_long (argc, argv, "hm:p:d:t:s:b:l:",
 			       long_options, &option_index);
 
       if (opt_param == -1) /* No more option parameters left */
@@ -167,8 +167,8 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
 	  value->BOARDCLOCKs = strtol(optarg, NULL, 10);
 	  break;
 
-	case 'l': /* show */
-	  fillShowBits(optarg, doBits);
+	case 'l': /* list */
+	  fillListBits(optarg, doBits);
 	  break;
 
 	case 'h': /* help */
@@ -188,43 +188,43 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
   return rval;
 }
 
-/* function to show available selections of the helicity generator */
+/* function to list available selections of the helicity generator */
 
 void
-helicity_generator_show_selections(uint8_t showMask)
+helicity_generator_list_selections(uint8_t listMask)
 {
 
-  if(showMask & DO_CLOCK)
+  if(listMask & DO_CLOCK)
     {
       printf(" Mode Selections:\n");
       heliPrintModeSelections();
     }
 
-  if(showMask & DO_PATTERN)
+  if(listMask & DO_PATTERN)
     {
       printf(" Helicity Pattern Selections:\n");
       heliPrintHelicityPatternSelections();
     }
 
-  if(showMask & DO_DELAY)
+  if(listMask & DO_DELAY)
     {
       printf(" Delay Selections:\n");
       heliPrintReportingDelaySelections();
     }
 
-  if(showMask & DO_TSETTLE)
+  if(listMask & DO_TSETTLE)
     {
       printf(" TSettle Selections:\n");
       heliPrintTSettleSelections();
     }
 
-  if(showMask & DO_TSTABLE)
+  if(listMask & DO_TSTABLE)
     {
       printf(" TStable Selections:\n");
       heliPrintTStableSelections();
     }
 
-  if(showMask & DO_BOARDCLOCK)
+  if(listMask & DO_BOARDCLOCK)
     {
       printf(" Board Clock Selections:\n");
       heliPrintBoardClockSelections();
@@ -314,9 +314,9 @@ main(int32_t argc, char *argv[])
       goto CLOSE;
     }
 
-  if(doBits & SHOW)
+  if(doBits & LIST)
     {
-      helicity_generator_show_selections(doBits);
+      helicity_generator_list_selections(doBits);
     }
   else
     {

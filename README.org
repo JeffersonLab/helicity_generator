@@ -66,8 +66,8 @@ Configure the helicity generator module with the provided arguments
  -t, --tsettle {index}             select the tsettle
  -s, --tstable {index}             select the tstable
  -b, --boardclock {index}          select the board clock output
-     --show {selections}           show the available selections for {selections}
-                                   (e.g. --show mode,pattern,tstable)
+ -l, --list {selections}           list the available selections for {selections}
+                                   (e.g. --list mode,pattern,tstable)
  -h, --help                        this help message
 
 Exit status:
