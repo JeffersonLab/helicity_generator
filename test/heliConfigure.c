@@ -30,7 +30,8 @@ enum doBits
     DO_TSETTLE    = 1 << 3,
     DO_TSTABLE    = 1 << 4,
     DO_BOARDCLOCK = 1 << 5,
-    LIST          = 1 << 6
+    DO_RESET      = 1 << 6,
+    LIST          = 1 << 7
   };
 
 /* this structure holds the user arguments */
@@ -59,6 +60,7 @@ usage()
   printf(" -b, --boardclock {index}          select the board clock output\n");
   printf(" -l, --list {selections}           list the available selections for {selections}\n");
   printf("                                   (e.g. --list mode,pattern,tstable)\n");
+  printf(" -r, --reset                       reset the module\n");
   printf(" -h, --help                        this help message\n");
   printf("\n");
   printf("Exit status:\n");
@@ -115,6 +117,7 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
     {"tstable",    required_argument, 0,        's'},
     {"boardclock", required_argument, 0,        'b'},
     {"list",       required_argument, 0,        'l'},
+    {"reset",      required_argument, 0,        'r'},
     {0, 0, 0, 0}
   };
 
@@ -126,7 +129,7 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
     {
       int opt_param, option_index = 0;
       option_index = 0;
-      opt_param = getopt_long (argc, argv, "hm:p:d:t:s:b:l:",
+      opt_param = getopt_long (argc, argv, "hm:p:d:t:s:b:l:r",
 			       long_options, &option_index);
 
       if (opt_param == -1) /* No more option parameters left */
@@ -165,6 +168,10 @@ parseArgs(int32_t argc, char *argv[], argValue_t *value, uint8_t *doBits)
 	case 'b': /* BOARDCLOCK */
 	  *doBits |= DO_BOARDCLOCK;
 	  value->BOARDCLOCKs = strtol(optarg, NULL, 10);
+	  break;
+
+	case 'r': /* RESET */
+	  *doBits |= DO_RESET;
 	  break;
 
 	case 'l': /* list */
@@ -238,6 +245,12 @@ int32_t
 helicity_generator_set(uint8_t setMask, argValue_t args)
 {
   int32_t rval = 0;
+
+  if(setMask & DO_RESET)
+    {
+      printf("RESET\n");
+      rval = heliReset();
+    }
 
   if(setMask & DO_CLOCK)
     {

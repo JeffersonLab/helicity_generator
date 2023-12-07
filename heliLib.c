@@ -11,6 +11,7 @@
  *
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <pthread.h>
 #include "jvme.h"
@@ -189,12 +190,14 @@ heliStatus(int32_t print_regs)
       READHELI(delay);
       READHELI(pattern);
       READHELI(clock);
+      READHELI(state);
       HUNLOCK;
 
       printf("\n");
       PREG(month);
       PREG(day);
       PREG(year);
+      PREG(state);
       PREG(tsettle);
       PREG(tstable);
       PREG(delay);
@@ -205,7 +208,7 @@ heliStatus(int32_t print_regs)
 
   uint32_t CLOCKd, PATTERNd, DELAYd;
   double FREQ, TSETTLEd, TSTABLEd, BOARDCLOCKd;
-  uint8_t DAY, MONTH, YEAR;
+  uint8_t DAY, MONTH, YEAR, STATE;
   heliGetMode(&CLOCKd);
   heliGetHelicityPattern(&PATTERNd);
   heliGetReportingDelay(&DELAYd);
@@ -214,6 +217,7 @@ heliStatus(int32_t print_regs)
   heliGetTStable(&TSTABLEd);
   heliGetBoardClock(&BOARDCLOCKd);
   heliGetFirmwareDate(&DAY, &MONTH, &YEAR);
+  heliGetSequencerState(&STATE);
 
   printf("\n");
 
@@ -246,12 +250,13 @@ heliStatus(int32_t print_regs)
   printf(" Output Clock:\n");
   printf("  %.f MHz\n\n", BOARDCLOCKd);
 
+  printf(" Sequencer State:\n");
+  printf("  0x%02x\n\n", STATE);
+
   printf(" Firmware:\n");
-  printf("  Month:  %2d   Day:  %2d   Year:  %2d\n", MONTH, DAY, YEAR);
+  printf("  Month:  %2d   Day:  %2d   Year:  %2d\n\n", MONTH, DAY, YEAR);
 
 
-  printf("\n");
-  printf("\n");
   printf("--------------------------------------------------------------------------------\n");
   printf("\n");
 
@@ -901,6 +906,63 @@ heliGetFirmwareDate(uint8_t *DAY, uint8_t *MONTH, uint8_t *YEAR)
   *DAY = vmeRead8(&hl.dev->day) & HELI_DAY_MASK;
   *MONTH = vmeRead8(&hl.dev->month) & HELI_MONTH_MASK;
   *YEAR = vmeRead8(&hl.dev->year) & HELI_YEAR_MASK;
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Set the reset bit
+ * @details Set the module reset bit.  Must be toggled.  @see heliReset
+ * @param[in] RESETs 1 for high, 0 for low
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliSetReset(uint8_t RESETs)
+{
+  CHECKHELI;
+
+  /* Just set to 1, if not 0 */
+  RESETs = (RESETs) ? 1 : 0;
+
+  HLOCK;
+  vmeWrite8(&hl.dev->reset, RESETs);
+  HUNLOCK;
+
+  return 0;
+}
+
+/**
+ * @brief Reset the module.
+ * @details Reset the module by toggling the reset bit in 1 second. @see heliSetReset
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliReset()
+{
+  CHECKHELI;
+
+  heliSetReset(1);
+  sleep(1);
+  heliSetReset(0);
+  sleep(1);
+
+  return 0;
+}
+
+/**
+ * @brief Get the sequencer state.
+ * @details Get the sequencer state.  A non-updating value indicates a reset is needed.  @see heliReset, @see heliSetReset
+ * @param[out] STATUSin Sequencer state of the module.
+ * @return 0 if successful, otherwise -1
+ */
+int32_t
+heliGetSequencerState(uint8_t *STATUSin)
+{
+  CHECKHELI;
+
+  HLOCK;
+  *STATUSin = vmeRead8(&hl.dev->state) & HELI_STATE_MASK;
   HUNLOCK;
 
   return 0;

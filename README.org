@@ -31,19 +31,19 @@ Initialize the library and display the current status of the helicity generator 
 STATUS for JLab Helicity Control Board
 
        month (0x00) = 0x06	         day (0x01) = 0x06
-        year (0x02) = 0x17	     tsettle (0x07) = 0x00
-     tstable (0x09) = 0x1e	       delay (0x0b) = 0x04
-     pattern (0x0d) = 0x00	       clock (0x0f) = 0x23
-
+        year (0x02) = 0x17	       state (0x04) = 0x20
+     tsettle (0x07) = 0x0e	     tstable (0x09) = 0x1e
+       delay (0x0b) = 0x03	     pattern (0x0d) = 0x01
+       clock (0x0f) = 0x63
 
  Mode                            Settle Time (usec)      Stable Time (usec)
   Free Clock                          100.00                33230.00
 
  Helicity Pattern:
-  Pair
+  Quartet
 
  Reporting Delay:
-  8 windows
+  4 windows
 
  Helicity Board Frequency:
   30.00 Hz
@@ -51,9 +51,11 @@ STATUS for JLab Helicity Control Board
  Output Clock:
   20 MHz
 
+ Sequencer State:
+  0x20
+
  Firmware:
   Month:   6   Day:   6   Year:  23
-
 
 --------------------------------------------------------------------------------
 #+end_example    
@@ -68,6 +70,7 @@ Configure the helicity generator module with the provided arguments
  -b, --boardclock {index}          select the board clock output
  -l, --list {selections}           list the available selections for {selections}
                                    (e.g. --list mode,pattern,tstable)
+ -r, --reset                       reset the module
  -h, --help                        this help message
 
 Exit status:
